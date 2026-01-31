@@ -1,0 +1,11 @@
+{
+  "owner": "orosha-ai",
+  "slug": "mcp-registry-manager",
+  "displayName": "Mcp Registry Manager",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1769873382674,
+    "commit": null
+  },
+  "history": []
+}
