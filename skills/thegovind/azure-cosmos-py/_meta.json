@@ -1,0 +1,11 @@
+{
+  "owner": "thegovind",
+  "slug": "azure-cosmos-py",
+  "displayName": "Azure Cosmos DB Python",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1769871000833,
+    "commit": null
+  },
+  "history": []
+}
