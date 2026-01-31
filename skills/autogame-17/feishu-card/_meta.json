@@ -1,11 +1,17 @@
 {
   "owner": "autogame-17",
   "slug": "feishu-card",
-  "displayName": "Feishu Interactive Card",
+  "displayName": "Feishu Card",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1769859253075,
-    "commit": "https://github.com/clawdbot/skills/commit/32c99df004a908f603ca48273457c67cde0f37d3"
+    "version": "1.0.1",
+    "publishedAt": 1769892971548,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1769859253075,
+      "commit": "https://github.com/clawdbot/skills/commit/32c99df004a908f603ca48273457c67cde0f37d3"
+    }
+  ]
 }
