@@ -1,0 +1,11 @@
+{
+  "owner": "thegovind",
+  "slug": "podcast-generation",
+  "displayName": "Podcast Generation with Microsoft Foundry",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1769870892990,
+    "commit": null
+  },
+  "history": []
+}
