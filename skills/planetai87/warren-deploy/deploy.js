@@ -22,11 +22,61 @@ const RPC_URL = process.env.RPC_URL || 'https://carrot.megaeth.com/rpc';
 const CHAIN_ID = parseInt(process.env.CHAIN_ID || '6343');
 const GENESIS_KEY_ADDRESS = process.env.GENESIS_KEY_ADDRESS || '0x954a7cd0e2f03041A6Abb203f4Cfd8E62D2aa692';
 const MASTER_NFT_ADDRESS = process.env.MASTER_NFT_ADDRESS || '0x7bb4233017CFd4f938C61d1dCeEF4eBE837b05F9';
-const CHUNK_SIZE = parseInt(process.env.CHUNK_SIZE || '100000');
+const CHUNK_SIZE = parseInt(process.env.CHUNK_SIZE || '15000'); // 15KB
 const GROUP_SIZE = parseInt(process.env.GROUP_SIZE || '500');
 const BATCH_SIZE = 5;
 const RETRY_MAX = 3;
 const RETRY_DELAY = 2000;
+
+// ============================================================================
+// MegaETH Multidimensional Gas Model (ported from Warren's megaeth-gas.ts)
+// ============================================================================
+
+const MEGAETH_GAS = {
+  INTRINSIC_COMPUTE: 21_000n,
+  INTRINSIC_STORAGE: 39_000n,
+  CONTRACT_CREATION_COMPUTE: 32_000n,
+  CONTRACT_CREATION_STORAGE_BASE: 32_000n,
+  CODE_DEPOSIT_PER_BYTE: 10_000n,
+  CALLDATA_ZERO_PER_BYTE: 40n,
+  CALLDATA_NONZERO_PER_BYTE: 160n,
+  EIP7623_FLOOR_ZERO_PER_BYTE: 100n,
+  EIP7623_FLOOR_NONZERO_PER_BYTE: 400n,
+  SSTORE2_COMPUTE_ESTIMATE: 700_000n,
+  PAGE_BYTECODE_OVERHEAD: 100n,
+};
+
+const MAX_GAS_PER_TX = 200_000_000n;
+
+function estimateChunkGasLimit(chunkSizeBytes) {
+  const dataSize = BigInt(chunkSizeBytes) + MEGAETH_GAS.PAGE_BYTECODE_OVERHEAD;
+
+  // Compute gas
+  const computeGas = MEGAETH_GAS.INTRINSIC_COMPUTE
+    + MEGAETH_GAS.CONTRACT_CREATION_COMPUTE
+    + MEGAETH_GAS.SSTORE2_COMPUTE_ESTIMATE;
+
+  // Storage gas
+  const codeDeposit = dataSize * MEGAETH_GAS.CODE_DEPOSIT_PER_BYTE;
+  const nonZeroBytes = BigInt(Math.floor(chunkSizeBytes * 0.8));
+  const zeroBytes = BigInt(chunkSizeBytes) - nonZeroBytes;
+
+  const calldataRegular = zeroBytes * MEGAETH_GAS.CALLDATA_ZERO_PER_BYTE
+    + nonZeroBytes * MEGAETH_GAS.CALLDATA_NONZERO_PER_BYTE;
+  const calldataFloor = zeroBytes * MEGAETH_GAS.EIP7623_FLOOR_ZERO_PER_BYTE
+    + nonZeroBytes * MEGAETH_GAS.EIP7623_FLOOR_NONZERO_PER_BYTE;
+  const calldata = calldataRegular > calldataFloor ? calldataRegular : calldataFloor;
+
+  const storageGas = MEGAETH_GAS.INTRINSIC_STORAGE + codeDeposit + calldata;
+
+  // Total with 50% buffer, capped at 200M
+  const total = computeGas + storageGas;
+  const withBuffer = (total * 150n) / 100n;
+  // Minimum 10M gas floor — SSTORE2 actual compute cost is much higher than model estimate
+  const MIN_GAS = 10_000_000n;
+  const gasLimit = withBuffer < MIN_GAS ? MIN_GAS : withBuffer;
+  return gasLimit < MAX_GAS_PER_TX ? gasLimit : MAX_GAS_PER_TX;
+}
 
 // ============================================================================
 // Inline ABIs & Bytecode (no external files needed)
@@ -95,7 +145,8 @@ async function deployPage(wallet, provider, content, nonce, label) {
   return withRetry(async () => {
     const factory = new ethers.ContractFactory(PAGE_ABI, PAGE_BYTECODE, wallet);
     const deployTx = await factory.getDeployTransaction(content);
-    deployTx.gasLimit = 100_000_000n;
+    const contentSize = Buffer.isBuffer(content) ? content.length : Buffer.from(content).length;
+    deployTx.gasLimit = estimateChunkGasLimit(contentSize);
     if (nonce !== undefined) deployTx.nonce = nonce;
     const tx = await wallet.sendTransaction(deployTx);
     const receipt = await tx.wait();
