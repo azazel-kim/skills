@@ -1,0 +1,11 @@
+{
+  "owner": "seungdols",
+  "slug": "naverstock-skill",
+  "displayName": "Naver Stock",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1769958838586,
+    "commit": null
+  },
+  "history": []
+}
