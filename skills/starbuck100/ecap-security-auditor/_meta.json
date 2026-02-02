@@ -1,11 +1,17 @@
 {
   "owner": "starbuck100",
   "slug": "ecap-security-auditor",
-  "displayName": "Ecap Security Auditor",
+  "displayName": "ecap Security Auditor",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1769956815558,
-    "commit": "https://github.com/clawdbot/skills/commit/eeccd7e225bd7612498c4b588b827659e1eeda45"
+    "version": "2.0.0",
+    "publishedAt": 1770026428681,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1769956815558,
+      "commit": "https://github.com/clawdbot/skills/commit/eeccd7e225bd7612498c4b588b827659e1eeda45"
+    }
+  ]
 }
