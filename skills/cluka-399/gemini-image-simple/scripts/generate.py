@@ -50,7 +50,7 @@ def generate_image(prompt, output_path, input_image_path=None):
     """Generate or edit an image using Gemini API."""
     api_key = get_api_key()
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/nano-banana-pro-preview:generateContent?key={api_key}"
     
     # Build request parts
     parts = [{"text": prompt}]

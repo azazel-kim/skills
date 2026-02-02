@@ -1,5 +1,6 @@
 ---
 name: gemini-image-simple
+version: 1.1.0
 description: Generate and edit images with Gemini API using pure Python stdlib. Zero dependencies - works on locked-down environments where pip/uv aren't available.
 metadata:
   openclaw:
@@ -10,7 +11,7 @@ metadata:
 
 # Gemini Image Simple
 
-Generate and edit images using Google's Gemini 2.0 Flash image generation API.
+Generate and edit images using Google's **Nano Banana Pro** (Gemini 3 Pro Image) - the highest quality image generation model.
 
 ## Why This Skill
 
@@ -58,12 +59,22 @@ Set `GEMINI_API_KEY` environment variable. Get one at https://aistudio.google.co
 
 ## How It Works
 
-Uses Gemini 2.0 Flash experimental image generation:
+Uses **Nano Banana Pro** (`nano-banana-pro-preview`) - Google's highest quality image generation model:
 - Pure `urllib.request` for HTTP (no requests library)
 - Pure `json` for parsing (stdlib)
 - Pure `base64` for encoding (stdlib)
 
 That's it. No external packages. Works on any Python 3.10+ installation.
+
+## Model
+
+Currently using: `nano-banana-pro-preview` (also known as Gemini 3 Pro Image)
+
+Other available models (can be changed in generate.py if needed):
+- `gemini-3-pro-image-preview` - Same as Nano Banana Pro
+- `imagen-4.0-ultra-generate-001` - Imagen 4.0 Ultra
+- `imagen-4.0-generate-001` - Imagen 4.0
+- `gemini-2.5-flash-image` - Gemini 2.5 Flash with image gen
 
 ## Examples
 
