@@ -1,0 +1,11 @@
+{
+  "owner": "byungkyu",
+  "slug": "slack-api",
+  "displayName": "Slack",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1770019409226,
+    "commit": null
+  },
+  "history": []
+}
