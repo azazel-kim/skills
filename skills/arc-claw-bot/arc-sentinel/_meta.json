@@ -1,0 +1,11 @@
+{
+  "owner": "arc-claw-bot",
+  "slug": "arc-sentinel",
+  "displayName": "Arc Sentinel",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1769978727118,
+    "commit": null
+  },
+  "history": []
+}
