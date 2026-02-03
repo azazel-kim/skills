@@ -1,0 +1,380 @@
+# TensorPM Skill
+
+**AI-Powered Project Management** - Intelligently manage projects, track action items, and coordinate teams with context-driven prioritization.
+
+**Local-first, no account required.** Full app, free forever — use your own API keys (OpenAI, Claude, Gemini, Mistral) or local models (Ollama, vLLM, LLM studio). Optional: Account with cloud sync enables E2E encrypted collaboration across devices and teams.
+
+Interact with TensorPM via MCP tools or A2A agent communication.
+
+## Download
+
+- **Windows:** [TensorPM-Setup.exe](https://github.com/Neo552/TensorPM-Releases/releases/latest/download/TensorPM-Setup.exe)
+- **macOS (Apple Silicon):** [TensorPM-macOS.dmg](https://github.com/Neo552/TensorPM-Releases/releases/latest/download/TensorPM-macOS.dmg)
+- **Linux (x86_64):** [TensorPM-Linux.AppImage](https://github.com/Neo552/TensorPM-Releases/releases/latest/download/TensorPM-Linux.AppImage)
+
+**Release Notes:** <https://github.com/Neo552/TensorPM-Releases/releases/latest>
+
+**Alternative:** <https://tensorpm.com>
+
+## Setup
+
+### MCP Integration (Automatic)
+
+TensorPM includes a built-in MCP server that runs locally. Install from within the app:
+
+1. Open TensorPM
+2. Go to **Settings → Integrations**
+3. Click **Install** for your AI client
+
+**Requirement:** TensorPM must be running for MCP tools to work.
+
+### Setting AI Provider Keys via MCP
+
+Use the `set_api_key` tool to configure AI providers directly from your AI client:
+
+```
+set_api_key
+  provider: "openai"      # openai, anthropic, google, mistral
+  api_key: "sk-..."
+```
+
+Keys are securely stored in TensorPM. Write-only - keys cannot be read back.
+
+### A2A Configuration
+
+TensorPM exposes a local A2A agent endpoint on port `37850`.
+
+**No authentication required** — A2A runs on localhost only, all local requests are trusted.
+
+### Agent Discovery
+
+**Step 1: Get Root Agent Card**
+```bash
+curl http://localhost:37850/.well-known/agent.json
+```
+
+Returns the root agent card with links to all project agents.
+
+**Step 2: List Projects**
+```bash
+curl http://localhost:37850/projects
+```
+
+Returns:
+```json
+[
+  {
+    "id": "project-uuid",
+    "name": "My Project",
+    "agentUrl": "http://localhost:37850/projects/project-uuid/a2a",
+    "agentCardUrl": "http://localhost:37850/projects/project-uuid/.well-known/agent.json"
+  }
+]
+```
+
+**Step 3: Get Project Agent Card**
+```bash
+curl http://localhost:37850/projects/{projectId}/.well-known/agent.json
+```
+
+Returns the A2A agent card for a specific project with capabilities and supported methods.
+
+### Talking to a Project Agent
+
+Send messages to a project's AI agent using JSON-RPC:
+
+```bash
+curl -X POST http://localhost:37850/projects/{projectId}/a2a \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "id": "1",
+    "params": {
+      "message": {
+        "role": "user",
+        "parts": [{"kind": "text", "text": "List high-priority items"}]
+      }
+    }
+  }'
+```
+
+**Supported JSON-RPC methods:**
+
+| Method | Description |
+|--------|-------------|
+| `message/send` | Send a message and get a blocking response |
+| `message/stream` | Send a message and stream the response via SSE |
+| `tasks/get` | Retrieve a task by ID with full state history |
+| `tasks/list` | List tasks for the project with optional filters |
+| `tasks/cancel` | Cancel a running task |
+| `tasks/resubscribe` | Resume streaming updates for a running task |
+
+**Continue a conversation** by passing `contextId`:
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "message/send",
+  "id": "2",
+  "params": {
+    "contextId": "context-uuid-from-previous-response",
+    "message": {
+      "role": "user",
+      "parts": [{"kind": "text", "text": "Tell me more about the first item"}]
+    }
+  }
+}
+```
+
+### Message Parts
+
+Messages support multiple part types:
+
+| Kind | Description |
+|------|-------------|
+| `text` | Plain text content: `{"kind": "text", "text": "Hello"}` |
+| `file` | File attachment: `{"kind": "file", "file": {"name": "doc.txt", "mimeType": "text/plain", "bytes": "base64..."}}` |
+| `data` | Structured data: `{"kind": "data", "data": {"key": "value"}}` |
+
+**File part fields:**
+- `name` — Filename (optional)
+- `mimeType` — MIME type (optional, defaults to `application/octet-stream`)
+- `bytes` — Base64-encoded file content
+- `uri` — URL reference to file (alternative to `bytes`)
+
+### Task Management
+
+Tasks track the lifecycle of message requests. States: `submitted`, `working`, `input-required`, `completed`, `canceled`, `failed`.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tasks/get",
+  "id": "1",
+  "params": {"id": "task-uuid", "historyLength": 10}
+}
+```
+
+### A2A REST Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/.well-known/agent.json` | Root agent card |
+| `GET` | `/projects` | List all projects with agent URLs |
+| `POST` | `/projects` | Create a new project |
+| `GET` | `/projects/:id` | Get complete project data |
+| `GET` | `/projects/:id/.well-known/agent.json` | Project agent card |
+| `GET` | `/projects/:id/contexts` | List conversations |
+| `GET` | `/projects/:id/contexts/:ctxId/messages` | Get message history |
+| `GET` | `/projects/:id/action-items` | List action items (supports filters) |
+| `POST` | `/projects/:id/action-items` | Create action items |
+| `PATCH` | `/projects/:id/action-items/:itemId` | Update an action item |
+| `POST` | `/projects/:id/a2a` | JSON-RPC messaging |
+
+**Optional Auth:** Set `A2A_HTTP_AUTH_TOKEN` env var before starting TensorPM to enable token validation.
+
+## Available MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `list_projects` | List all projects with names and IDs |
+| `create_project` | Create a new project with name and optional description |
+| `get_project` | Get complete project data (read-only) |
+| `list_action_items` | Query and filter action items |
+| `submit_action_items` | Create new action items |
+| `update_action_items` | Update existing action items |
+| `propose_updates` | Submit project updates for human review |
+| `set_api_key` | Set AI provider API key (openai, anthropic, google, mistral) |
+
+**Note:** MCP tools provide direct access to action items. Core project context (profile, budget, people, categories) can only be modified by the TensorPM project manager agent — use A2A `message/send` to request changes.
+
+## Usage
+
+### List Projects
+
+```
+list_projects
+```
+
+Returns all projects with their names and IDs.
+
+### Create Project
+
+```
+create_project
+  name: "My New Project"
+  description: "Optional project description"
+```
+
+Returns the created project with its ID.
+
+### Get Project Details
+
+```
+get_project
+  projectId: "project-uuid"
+```
+
+Returns complete project data including metadata, categories, people, and action items.
+
+### List Action Items
+
+Query action items with optional filters:
+
+```
+list_action_items
+  projectId: "project-uuid"
+  status: "open"              # open, inProgress, completed, blocked
+  categoryName: "Development" # Filter by category name
+  assignedTo: "person-uuid"   # Filter by assigned person ID
+  urgency: "high"             # very low, low, medium, high, overdue
+  impact: "high"              # minimal, low, medium, high, critical
+  complexity: "moderate"      # very simple, simple, moderate, complex, very complex
+  dueBefore: "2024-12-31"     # Filter items due before date
+  dueAfter: "2024-01-01"      # Filter items due after date
+  search: "authentication"    # Text search across items
+  sortBy: "priority"          # priority, dueDate, createdAt
+  sortDirection: "desc"       # asc, desc
+  limit: 50                   # Max items (default: 50, max: 200)
+  offset: 0                   # Pagination offset
+  includeDescription: true    # Include full descriptions
+```
+
+### Create Action Items
+
+```
+submit_action_items
+  projectId: "project-uuid"
+  actionItems: [
+    {
+      "text": "Implement user authentication",
+      "description": "Add OAuth2 login with Google and GitHub providers",
+      "categoryId": "category-uuid",
+      "assignedPeople": ["person-uuid"],
+      "dueDate": "2024-02-15",
+      "urgency": "high",
+      "impact": "high",
+      "complexity": "moderate"
+    }
+  ]
+```
+
+### Update Action Items
+
+```
+update_action_items
+  projectId: "project-uuid"
+  updates: [
+    {
+      "id": "action-item-uuid",
+      "status": "inProgress"
+    },
+    {
+      "id": "another-uuid",
+      "status": "completed",
+      "description": "Updated description with implementation notes"
+    }
+  ]
+```
+
+Supports partial updates - only provided fields are changed.
+
+### Propose Project Updates
+
+Submit comprehensive updates for human review (notes, risks, decisions, etc.):
+
+```
+propose_updates
+  projectId: "project-uuid"
+  format: "markdown"          # auto, plain_text, markdown, html, json
+  update: |
+    ## Sprint Review Notes
+
+    ### Completed
+    - Authentication system deployed
+    - Performance optimizations merged
+
+    ### Risks Identified
+    - Database migration may require downtime
+
+    ### Decisions Made
+    - Switching from REST to GraphQL for new endpoints
+  metadata: '{"sprint": 12, "date": "2024-02-01"}'
+```
+
+## Action Item Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier (auto-generated on create) |
+| `displayId` | number | Human-readable sequential ID (e.g., 1, 2, 3) |
+| `text` | string | Short title/summary |
+| `description` | string | Detailed description |
+| `status` | string | `open`, `inProgress`, `completed`, `blocked` |
+| `categoryId` | string | Category UUID |
+| `assignedPeople` | string[] | Array of Person UUIDs or names |
+| `dueDate` | string | ISO date (YYYY-MM-DD) - required, cannot be cleared |
+| `startDate` | string | ISO date (YYYY-MM-DD), or `null` to clear |
+| `urgency` | string | `very low`, `low`, `medium`, `high`, `overdue` |
+| `impact` | string | `minimal`, `low`, `medium`, `high`, `critical` |
+| `complexity` | string | `very simple`, `simple`, `moderate`, `complex`, `very complex` |
+| `priority` | number | Priority score (1-100) |
+| `planEffort` | object | `{value: number, unit: "hours" \| "days"}`, or `null` to clear |
+| `planBudget` | object | `{amount: number, currency?: string}`, or `null` to clear |
+| `manualEffort` | object | Actual effort: `{value: number, unit: "hours" \| "days"}`, or `null` to clear |
+| `isBudget` | object | Actual budget spent: `{amount: number, currency?: string}`, or `null` to clear |
+| `blockReason` | string | Reason when status is `blocked` |
+
+## A2A REST API Examples
+
+### Create a project via A2A
+
+```bash
+curl -X POST http://localhost:37850/projects \
+  -H "Content-Type: application/json" \
+  -d '{"name": "New Project", "description": "Project description"}'
+```
+
+### Get project details
+
+```bash
+curl http://localhost:37850/projects/{projectId}
+```
+
+### List action items with filters
+
+```bash
+curl "http://localhost:37850/projects/{projectId}/action-items?status=open&limit=10"
+```
+
+### Create action items
+
+```bash
+curl -X POST http://localhost:37850/projects/{projectId}/action-items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "actionItems": [
+      {"text": "New task", "urgency": "high", "complexity": "moderate"}
+    ]
+  }'
+```
+
+### Update an action item
+
+```bash
+curl -X PATCH http://localhost:37850/projects/{projectId}/action-items/{itemId} \
+  -H "Content-Type: application/json" \
+  -d '{"status": "completed"}'
+```
+
+## Notes
+
+- Project and action item IDs are UUIDs
+- Use `list_projects` first to get available project IDs
+- Use `get_project` to retrieve category and person IDs for filtering
+- `propose_updates` submissions require human approval before being applied
+- All dates use ISO 8601 format (YYYY-MM-DD)
+- **MCP** runs locally — TensorPM app must be running
+- **A2A** runs on `localhost:37850` — no auth required (localhost only)
+- Both MCP and A2A access the same local project data
+- API keys for AI providers can be set via MCP (`set_api_key`) or in TensorPM Settings
