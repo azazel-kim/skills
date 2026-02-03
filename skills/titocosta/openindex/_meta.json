@@ -3,9 +3,15 @@
   "slug": "openindex",
   "displayName": "End-to-end encrypted messaging and EVM crypto wallet for agent identity",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1770071916678,
-    "commit": "https://github.com/clawdbot/skills/commit/e98fce6166361e5a92e1f13f9b75b2b43eee2931"
+    "version": "1.0.7",
+    "publishedAt": 1770127359860,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1770071916678,
+      "commit": "https://github.com/clawdbot/skills/commit/e98fce6166361e5a92e1f13f9b75b2b43eee2931"
+    }
+  ]
 }
