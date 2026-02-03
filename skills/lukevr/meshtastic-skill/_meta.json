@@ -1,0 +1,11 @@
+{
+  "owner": "lukevr",
+  "slug": "meshtastic-skill",
+  "displayName": "Off-grid radio for sovereign AI. LoRa mesh comms via Meshtastic — no internet required.",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1770130804399,
+    "commit": null
+  },
+  "history": []
+}
