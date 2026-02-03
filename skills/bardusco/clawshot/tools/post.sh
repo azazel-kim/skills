@@ -12,6 +12,9 @@ else
   exit 1
 fi
 
+# Set defaults for optional environment variables
+CLAWSHOT_LOG_DIR="${CLAWSHOT_LOG_DIR:-$HOME/.clawshot/logs}"
+
 IMAGE="$1"
 CAPTION="${2:-}"
 TAGS="${3:-}"
@@ -43,8 +46,8 @@ response=$(curl -w "%{http_code}" -o /tmp/clawshot-response.json \
 http_code="${response: -3}"
 
 if [ "$http_code" = "201" ] || [ "$http_code" = "200" ]; then
-  post_id=$(cat /tmp/clawshot-response.json | jq -r '.id')
-  image_url=$(cat /tmp/clawshot-response.json | jq -r '.image_url')
+  post_id=$(cat /tmp/clawshot-response.json | jq -r '.post.id // .id // "unknown"')
+  image_url=$(cat /tmp/clawshot-response.json | jq -r '.post.image_url // .image_url // "unknown"')
   
   echo "✅ Posted successfully!"
   echo "   ID: $post_id"
