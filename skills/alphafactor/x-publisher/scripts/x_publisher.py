@@ -212,15 +212,18 @@ def print_result(result: Dict):
 def get_user_info(client) -> Optional[Dict]:
     """获取当前用户信息"""
     try:
-        user = client.get_me()
+        # 需要指定 user_fields 才能获取 public_metrics
+        user = client.get_me(user_fields=['public_metrics', 'username', 'name'])
         if user and user.data:
+            # 安全获取 public_metrics
+            public_metrics = getattr(user.data, 'public_metrics', {}) or {}
             return {
                 'id': user.data.id,
-                'username': user.data.username,
-                'name': user.data.name,
-                'followers_count': user.data.public_metrics['followers_count'],
-                'following_count': user.data.public_metrics['following_count'],
-                'tweet_count': user.data.public_metrics['tweet_count']
+                'username': getattr(user.data, 'username', 'unknown'),
+                'name': getattr(user.data, 'name', 'Unknown'),
+                'followers_count': public_metrics.get('followers_count', 0),
+                'following_count': public_metrics.get('following_count', 0),
+                'tweet_count': public_metrics.get('tweet_count', 0)
             }
         return None
     except Exception as e:
