@@ -3,11 +3,16 @@
   "slug": "eyebot-tokenforge",
   "displayName": "Eyebot Tokenforge",
   "latest": {
-    "version": "1.4.0",
-    "publishedAt": 1770637533019,
-    "commit": "https://github.com/openclaw/skills/commit/afb92e5c53fb6e9d3b56f5ce9fa59fe9c86dd5cc"
+    "version": "1.8.0",
+    "publishedAt": 1770638968398,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.4.0",
+      "publishedAt": 1770637533019,
+      "commit": "https://github.com/openclaw/skills/commit/afb92e5c53fb6e9d3b56f5ce9fa59fe9c86dd5cc"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1770597835807,
