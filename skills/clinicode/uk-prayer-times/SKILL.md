@@ -1,10 +1,16 @@
+---
+name: uk-prayer-times
+version: 1.0.0
+description: Get instant, accurate Islamic prayer times for any UK location. Auto-detects your city or accepts any UK location name (cities, towns, boroughs). Handles typos with smart fuzzy search. Shows Fajr, Sunrise, Dhuhr, Asr, Maghrib, and Isha times in 12-hour format. Uses ISNA calculation method (UK standard) via Aladhan API. Perfect for UK Muslims checking daily salah times.
+---
+
 # UK Prayer Times
 
 Get instant, accurate Islamic prayer times for any UK location. Auto-detects your city or accepts any UK location name (cities, towns, boroughs). Handles typos with smart fuzzy search. Shows Fajr, Sunrise, Dhuhr, Asr, Maghrib, and Isha times in 12-hour format. Uses ISNA calculation method (UK standard) via Aladhan API. Perfect for UK Muslims checking daily salah times.
 
 ## Usage
 
-**Gives prayer times in the UK based on your locations:**
+**Gives prayer times in the UK based on your location:**
 ```
 prayer times
 ```
