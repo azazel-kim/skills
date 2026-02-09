@@ -1,6 +1,6 @@
 # AgentOS SDK for Clawdbot
 
-**Version:** 1.4.2
+**Version:** 1.4.4
 
 The complete AgentOS integration for Clawdbot. One install, full access to everything.
 
@@ -32,7 +32,7 @@ aos sync
 ### What Gets Synced
 **Golden Sync (recommended)** updates BOTH:
 - **Memory** (CONTEXT.md, daily notes, project compartments, learnings, heartbeat status)
-- **Projects tab** (posts a lightweight activity heartbeat per project so the dashboard never looks stale)
+- **Projects tab** (Activity + Tasks + Ideas + Changelog + Challenges) by syncing from per-project markdown files
 
 Memory specifics:
 - **CONTEXT.md** — Your working memory/current state (MUST include active conversation state)
